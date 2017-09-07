@@ -1,0 +1,14 @@
+"repositories": [
+    {
+        "type": "package",
+        "package": {
+            "name": "spritian/php-bitfinex-v2",
+            "version": "dev-master",
+            "source": {
+                "url": "git://github.com/spritian/php-bitfinex-v2.git",
+                "type": "git",
+                "reference": "master"
+            }
+        }
+    }
+],
