@@ -25,4 +25,8 @@ print_r($tickers);
 /* Fetch open orders */
 $orders=$bfx->get_orders();
 print_r($orders);
+
+/* Fetch orders history for symbol tBTCUSD */
+$orderhist=$bfx->get_orderhist('tBTCUSD');
+print_r($orderhist);
 ?>
