@@ -14,7 +14,9 @@ class Bitfinex {
 		$this->api_key=$api_key;
 		$this->api_secret=$api_secret;
 	}
-
+	
+	/* Core api request functions */ 
+	
 	/* Build BFX Headers for v2 API */
 	private function headers($path)
 	{
@@ -74,68 +76,6 @@ class Bitfinex {
 		} else {			
 			return $this->output($result, $this->is_bitfinex_error($ch), $request);
 		}
-	}
-
-	/* API: Get Tickers - Ugly, need to fix this.*/
-	public function get_tickers($symbols) {
-		$request=$this->build_url_path("tickers", "?symbols=".implode(",", $symbols));
-
-		$tickers=$this->send_public_endpoint_request($request);
-		$t=array();
-		for ($z=0; $z<count($tickers); $z++) {
-			if (substr($tickers[$z][0], 0, 1)=="t") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][3];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][7];
-			} elseif (substr($tickers[$z][0], 0, 1)=="f") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][5];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][10];
-			}
-		}
-
-		return $t;
-	}
-
-	/* API: Get Orders */
-	public function get_orders() {
-		$request=$this->build_url_path("auth/r/orders");
-		$data=array("request" => $request);
-
-		$orders=$this->send_auth_endpoint_request($data);
-		$o=array();
-		for ($z=0; $z<count($orders); $z++) {
-			if (substr($orders[$z][3], 0, 1)=="t") {
-				$sym_fix=substr($orders[$z][3], 1, strlen($orders[$z][3]));
-					$o[$orders[$z][0]]["symbol"]=$sym_fix;
-					$o[$orders[$z][0]]["type"]=$orders[$z][8];
-					$o[$orders[$z][0]]["amount"]=$orders[$z][6];
-					$o[$orders[$z][0]]["amount_orig"]=$orders[$z][7];
-					$o[$orders[$z][0]]["price"]="$".$orders[$z][16];
-					$o[$orders[$z][0]]["order_status"]=$orders[$z][13];
-			}
-		}
-
-		return $o;
-	}
-
-	/* API: Get Orders - only handling exchange balances right now */
-	public function get_balances() {
-		$request=$this->build_url_path("auth/r/wallets");
-		$data=array("request" => $request);
-
-		$balances=$this->send_auth_endpoint_request($data);
-		$b=array();
-		$count=0;
-		for ($z=0; $z<count($balances); $z++) {
-			if ($balances[$z][0]=="exchange") {
-				if ($balances[$z][2]!="0") {
-					$b[$count]["currency"]=$balances[$z][1];
-					$b[$count]["amount"]=$balances[$z][2];
-					$count++;
-				}
-			}
-		}
-
-		return $b;
 	}
 
 	/* Handle CURL errors */
@@ -199,5 +139,102 @@ class Bitfinex {
 
 		return "/$method$parameters";
 	}  
+	
+	/* End core api request functions */
+	
+	/* v2 api requests */ 
+	
+	/* API: Get Tickers - Ugly, need to fix this.*/
+	public function get_tickers($symbols) {
+		$request=$this->build_url_path("tickers", "?symbols=".implode(",", $symbols));
+
+		$tickers=$this->send_public_endpoint_request($request);
+		$t=array();
+		for ($z=0; $z<count($tickers); $z++) {
+			if (substr($tickers[$z][0], 0, 1)=="t") {
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][3];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][7];
+			} elseif (substr($tickers[$z][0], 0, 1)=="f") {
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][5];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][10];
+			}
+		}
+
+		return $t;
+	}
+
+	/* API: Get Orders */
+	public function get_orders() {
+		$request=$this->build_url_path("auth/r/orders");
+		$data=array("request" => $request);
+
+		$orders=$this->send_auth_endpoint_request($data);
+		$o=array();
+		for ($z=0; $z<count($orders); $z++) {
+			if (substr($orders[$z][3], 0, 1)=="t") {
+				$sym_fix=substr($orders[$z][3], 1, strlen($orders[$z][3]));
+					$o[$orders[$z][0]]["symbol"]=$sym_fix;
+					$o[$orders[$z][0]]["type"]=$orders[$z][8];
+					$o[$orders[$z][0]]["amount"]=$orders[$z][6];
+					$o[$orders[$z][0]]["amount_orig"]=$orders[$z][7];
+					$o[$orders[$z][0]]["price"]="$".$orders[$z][16];
+					$o[$orders[$z][0]]["order_status"]=$orders[$z][13];
+			}
+		}
+
+		return $o;
+	}
+
+	/* API: Get Orders - only handling exchange balances right now */
+	public function get_balances() {
+		$request=$this->build_url_path("auth/r/wallets");
+		$data=array("request" => $request);
+
+		$balances=$this->send_auth_endpoint_request($data);
+		$b=array();
+		$count=0;
+		for ($z=0; $z<count($balances); $z++) {
+			if ($balances[$z][0]=="exchange") {
+				if ($balances[$z][2]!="0") {
+					$b[$count]["currency"]=$balances[$z][1];
+					$b[$count]["amount"]=$balances[$z][2];
+					$count++;
+				}
+			}
+		}
+
+		return $b;
+	}
+	
+	/* API: Get orders history - by symbol */
+        public function get_orderhist($symbol){
+                $request=$this->build_url_path("auth/r/orders/".$symbol."/hist");
+                $data=array("request" => $request);
+		$balances=$this->send_auth_endpoint_request($data);
+                //format data
+                $b=array();
+		$count=0;
+		for ($z=0; $z<count($balances); $z++) {
+			$b[$count]["id"]=$balances[$z][0];
+			$b[$count]["gid"]=$balances[$z][1];
+                        $b[$count]["cid"]=$balances[$z][2];
+                        $b[$count]["symbol"]=$balances[$z][3];
+                        $b[$count]["created"]=$balances[$z][4];
+                        $b[$count]["updated"]=$balances[$z][5];
+                        $b[$count]["amount"]=$balances[$z][6];
+                        $b[$count]["amount_orig"]=$balances[$z][7];
+                        $b[$count]["type"]=$balances[$z][8];
+                        $b[$count]["type_prev"]=$balances[$z][9];
+                        $b[$count]["price"]=$balances[$z][12];
+                        $b[$count]["price_avg"]=$balances[$z][13];
+                        $b[$count]["price_trailing"]=$balances[$z][14];
+                        $b[$count]["price_aux_limit"]=$balances[$z][15];
+                        $b[$count]["notify"]=$balances[$z][19];
+                        $b[$count]["hidden"]=$balances[$z][20];
+                        $b[$count]["placed_id"]=$balances[$z][21];
+                        $count++;
+		}
+		return $b;
+        }
 }
 ?>
