@@ -152,11 +152,27 @@ class Bitfinex {
 		$t=array();
 		for ($z=0; $z<count($tickers); $z++) {
 			if (substr($tickers[$z][0], 0, 1)=="t") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][3];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][7];
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["bid"]=number_format($tickers[$z][1],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["bid_size"]=number_format($tickers[$z][2],10);
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=number_format($tickers[$z][3],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask_size"]=number_format($tickers[$z][4],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["daily_change"]=number_format($tickers[$z][5],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["daily_change_perc"]=$tickers[$z][6];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=number_format($tickers[$z][7],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["volume"]=$tickers[$z][8];
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["high"]=number_format($tickers[$z][9],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["low"]=number_format($tickers[$z][10],10);
 			} elseif (substr($tickers[$z][0], 0, 1)=="f") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][5];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][10];
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["bid"]=number_format($tickers[$z][2],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["bid_size"]=number_format($tickers[$z][3],10);
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=number_format($tickers[$z][5],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask_size"]=number_format($tickers[$z][6],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["daily_change"]=number_format($tickers[$z][8],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["daily_change_perc"]=$tickers[$z][9];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=number_format($tickers[$z][10],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["volume"]=$tickers[$z][11];
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["high"]=number_format($tickers[$z][12],10);
+                                $t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["low"]=number_format($tickers[$z][13],10);
 			}
 		}
 
