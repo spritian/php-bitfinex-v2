@@ -152,11 +152,11 @@ class Bitfinex {
 		$t=array();
 		for ($z=0; $z<count($tickers); $z++) {
 			if (substr($tickers[$z][0], 0, 1)=="t") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][3];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][7];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][7];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][3];
 			} elseif (substr($tickers[$z][0], 0, 1)=="f") {
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][5];
-				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][10];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["last_price"]=$tickers[$z][10];
+				$t[substr($tickers[$z][0], 1, strlen($tickers[$z][0]))]["ask"]=$tickers[$z][5];
 			}
 		}
 
