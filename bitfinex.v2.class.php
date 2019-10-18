@@ -225,13 +225,16 @@ class Bitfinex {
                         $b[$count]["amount_orig"]=$balances[$z][7];
                         $b[$count]["type"]=$balances[$z][8];
                         $b[$count]["type_prev"]=$balances[$z][9];
-                        $b[$count]["price"]=$balances[$z][12];
-                        $b[$count]["price_avg"]=$balances[$z][13];
-                        $b[$count]["price_trailing"]=$balances[$z][14];
-                        $b[$count]["price_aux_limit"]=$balances[$z][15];
-                        $b[$count]["notify"]=$balances[$z][19];
-                        $b[$count]["hidden"]=$balances[$z][20];
-                        $b[$count]["placed_id"]=$balances[$z][21];
+                        $b[$count]["flags"]=$balances[$z][12];
+                        $b[$count]["order_status"]=$balances[$z][13];
+                        $b[$count]["price"]=number_format($balances[$z][16],10);
+                        $b[$count]["price_avg"]=number_format($balances[$z][17],10);
+                        $b[$count]["price_trailing"]=$balances[$z][18];
+                        $b[$count]["price_aux_limit"]=$balances[$z][19];
+                        $b[$count]["hidden"]=$balances[$z][24];
+                        $b[$count]["placed_id"]=$balances[$z][25];
+                        $b[$count]["routing"]=$balances[$z][28];
+                        $b[$count]["meta"]=$balances[$z][31];
                         $count++;
 		}
 		return $b;
