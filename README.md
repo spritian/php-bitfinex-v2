@@ -10,11 +10,5 @@ Requirements:
 
 If you like this code, please feel free to donate at any of my addresses below. Thanks and enjoy!
 
-XMR: 
-4AuFyQ4PTaWGVJUpiaAZCWjGT84jMKpWaY7asUnVgn51aqZKuQB9sE9We9UkEMfT4j9fW5LV8nn7AU7nTdRKSpvKLvH4uy7
-
-ETH: 
-0x71e88a46686e26318565def9bd88a722ee397a07
-
 BTC:
-1BLD7FwqsxVyEwM8Mth6CCVMmwaBUcAPiN
+1Gzx2UuyW4jTueyznJmaWg5tLTd1DffZvG
