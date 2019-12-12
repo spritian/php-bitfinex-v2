@@ -1,7 +1,7 @@
 <?php 
 // This is still a WIP - Not fully functional - YET. Only has the functions I needed to quickly display my wallet data, currency pairs, and open orders using Bitfinex's v2 API.
 
-class BitfinexV2 {
+class Bitfinex{
 	const API_TIMEOUT=60;
 	const API_RETRIES=3; //not implemented yet, will use a counter in output function
 	const API_URL="https://api.bitfinex.com/v2";
@@ -10,7 +10,7 @@ class BitfinexV2 {
 	private $api_key="";
 	private $api_secret="";
 
-	public function __construct($userid, $api_key, $api_secret) {
+	public function __construct($api_key, $api_secret) {
 		$this->api_key=$api_key;
 		$this->api_secret=$api_secret;
 	}
