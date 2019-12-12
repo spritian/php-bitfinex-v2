@@ -1,16 +1,16 @@
 <?php 
 // This is still a WIP - Not fully functional - YET. Only has the functions I needed to quickly display my wallet data, currency pairs, and open orders using Bitfinex's v2 API.
 
-class Bitfinex {
+class BitfinexV2 {
 	const API_TIMEOUT=60;
 	const API_RETRIES=3; //not implemented yet, will use a counter in output function
 	const API_URL="https://api.bitfinex.com/v2";
-	const DISPLAY_ERRORS=false; //not implemented yet
+	const DISPLAY_ERRORS=true; //not implemented yet
 	
 	private $api_key="";
 	private $api_secret="";
 
-	public function __construct($api_key, $api_secret) {
+	public function __construct($userid, $api_key, $api_secret) {
 		$this->api_key=$api_key;
 		$this->api_secret=$api_secret;
 	}
@@ -18,10 +18,10 @@ class Bitfinex {
 	/* Core api request functions */ 
 	
 	/* Build BFX Headers for v2 API */
-	private function headers($path)
+	private function headers($path, $postdata)
 	{
 		$nonce		=(string) number_format(round(microtime(true) * 100000), 0, ".", "");
-		$body		="{}";
+		$body		=$postdata;
 		$signature	="/api/v2".$path["request"].$nonce.$body;
 		$h			=hash_hmac("sha384", utf8_encode($signature), utf8_encode($this->api_secret));
 
@@ -35,23 +35,42 @@ class Bitfinex {
 	}
 
 	/* Authenticated Endpoints Request */
-	private function send_auth_endpoint_request($data) {
+	private function send_auth_endpoint_request($data, $postdata) {
 		$ch=curl_init();
 		$url=self::API_URL.$data["request"];
-		$headers=$this->headers($data);
-
+		$headers=$this->headers($data, $postdata);
+		
+		if($postdata==false)
+		{
+			$postdata="{}"; 
+			//echo 'Error to Here 1'; 
+			$postdata2 ='{}';
+		}
+		else if($postdata=="{}")
+		{
+			$postdata="{}"; 
+			//echo 'Error to Here 2'; 
+			$postdata2 ='{}';
+		}
+		else
+		{
+			$postdata2 = http_build_query($postdata);
+			//echo $postdata2."<br>";
+		}
+		
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_POST, true);                                                                     
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);                                                                   
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);                                                                      
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);                                                                      
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::API_TIMEOUT);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "{}");
-
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata2);
+		
 		if(!$result=curl_exec($ch)) {
 			return $this->curl_error($ch);
 		} else {    	
-			return $this->output($result, $this->is_bitfinex_error($ch), $data);
+					//下方有一個output函數有修改過
+			return $this->output($result, $this->is_bitfinex_error($ch), $data, $postdata);
 		}
 	}
 
@@ -101,18 +120,23 @@ class Bitfinex {
 	}
 
 	/* Retrieve CURL response, if API err or RATE LIMIT hit, recall routine. Need to implement max retries. */
-	private function output($result, $is_error=false, $command) {
+	private function output($result, $is_error=false, $command, $postdata) {
 		$response=json_decode($result, true);
 
 		if ($response[0]=="error" or $response["error"]=="ERR_RATE_LIMIT") {
 			if (!is_array($command)) {
-				//echo "Retrying... '".$command."' in 10 seconds.\n";
+				//echo "Retrying... '".$command."' in 10 seconds.<br>";
+				//echo "First Type Error:".$response["error"]."<br>";
+				//echo "First Type Error:".$response[0]."<br>";				
 				sleep(10);
 				return $this->send_public_endpoint_request($command);
 			} else {
-				//echo "Retrying... '".$command["request"]."' in 10 seconds.\n";
+				//echo "Retrying... '".$command["request"]."' in 10 seconds.<br>";
+				//echo "Second Type Error:".$response["error"]."<br>";
+				//echo "Second Type Error:".$response[0]."<br>";
 				sleep(10);
-				return $this->send_auth_endpoint_request($command);
+				//return $this->send_auth_endpoint_request($command, $postdata);
+				return $this->send_auth_endpoint_request($command,"{}");
 			}
 		} else {
 			if ($is_error) {
@@ -168,7 +192,7 @@ class Bitfinex {
 		$request=$this->build_url_path("auth/r/orders");
 		$data=array("request" => $request);
 
-		$orders=$this->send_auth_endpoint_request($data);
+		$orders=$this->send_auth_endpoint_request($data,"{}");
 		$o=array();
 		for ($z=0; $z<count($orders); $z++) {
 			if (substr($orders[$z][3], 0, 1)=="t") {
@@ -189,12 +213,12 @@ class Bitfinex {
 	public function get_balances() {
 		$request=$this->build_url_path("auth/r/wallets");
 		$data=array("request" => $request);
-
-		$balances=$this->send_auth_endpoint_request($data);
+		
+		$balances=$this->send_auth_endpoint_request($data,'{}');
 		$b=array();
 		$count=0;
 		for ($z=0; $z<count($balances); $z++) {
-			if ($balances[$z][0]=="exchange") {
+			if ($balances[$z][0]=="funding") {
 				if ($balances[$z][2]!="0") {
 					$b[$count]["currency"]=$balances[$z][1];
 					$b[$count]["amount"]=$balances[$z][2];
@@ -210,7 +234,7 @@ class Bitfinex {
         public function get_orderhist($symbol){
                 $request=$this->build_url_path("auth/r/orders/".$symbol."/hist");
                 $data=array("request" => $request);
-		$balances=$this->send_auth_endpoint_request($data);
+		$balances=$this->send_auth_endpoint_request($data,'{}');
                 //format data
                 $b=array();
 		$count=0;
@@ -239,5 +263,33 @@ class Bitfinex {
 		}
 		return $b;
         }
+		
+	/* API: Get Ledgers - by symbol */
+        public function get_ledgers($symbol){
+                $request=$this->build_url_path("auth/r/ledgers/".$symbol."/hist");
+				//$request=$this->build_url_path("auth/r/ledgers/hist");
+                $data=array("request" => $request);
+				$limit = 30;
+				
+				$ledgerDetails = array('limit' => $limit);
+								
+				$balances=$this->send_auth_endpoint_request($data,$ledgerDetails);
+                //format data
+                $b=array();
+		$count=0;
+		for ($z=0; $z<count($balances); $z++) {
+						$b[$count]["id"]=$balances[$z][0];
+						$b[$count]["currency"]=$balances[$z][1];
+                        $b[$count]["mts"]=$balances[$z][3];
+                        $b[$count]["amount"]=$balances[$z][5];
+						$b[$count]["balance"]=$balances[$z][6];
+						$b[$count]["description"]=$balances[$z][8];
+                        $count++;
+		}
+		return $b;
+        }	
+
+			/*Ref: https://docs.bitfinex.com/reference#rest-auth-ledgers */
+		
 }
 ?>
